@@ -1,0 +1,11 @@
+supplier_id,supplier_name,contact_name,email,phone,address,rating,is_active
+1,North Distributor,Charles Wilson,contact@northdistributor.com,+1 920-238-7895,6605 Chicago,3.9,false
+2,South Importer,John Smith,contact@southimporter.com,+1 877-850-2976,3552 Houston,3.9,false
+3,Central Wholesale,Charles Wilson,contact@centralwholesale.com,+1 226-529-8204,5325 Chicago,3.4,true
+4,"Express Logistics
+",John Smith,contact@expresslogistics.com,+1 258-719-4672,3883 Chicago,4.3,
+5,United Providers,Anna Brown,contact@unitedproviders.com,+1 273-489-5416,,4.9,true
+6,Global Supply,,contact@globalsupply.com,  +1 232-101-7906  ,709 San Antonio,2042.6999999999998,true
+7,FastImport,Anna Brown,contact@fastimport.com,+1 845-577-6815,8870 Austin,4.2,true
+8,  QualitySource  ,Charles Wilson,contact@qualitysource.com,+1 221-732-4417,2643 New York,4.6,false
+4,Express Logistics,JOHN SMITH,contact@expresslogistics.com,+1 258-719-4672,3883 Chicago,4.3,

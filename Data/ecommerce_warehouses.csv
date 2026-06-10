@@ -1,0 +1,7 @@
+warehouse_id,warehouse_name,location,capacity_units,current_occupancy,manager_name
+1,Warehouse 1,New York,81706,69,Laura Johnson
+2,Warehouse 2,Los Angeles,36482,51,David Williams
+3,Warehouse 3,Chicago,41482,51,Martin Davis
+4,Warehouse 4,Houston,53780,43,David Williams
+5,Warehouse 5,Phoenix,28881,,Sophie Brown
+1,Warehouse 1,New York,81706,69,Laura Johnson
