@@ -262,8 +262,134 @@ print("------------------------------------------")
 # Transform: Manejo de tipo de variables
 ###########################################
 
+# Ver tipos de variables actuales
+print("------------------------------------------")
+print(f'\nTipos de variables de orders:')
+print(df_orders_clean_dupl.dtypes)
+print(f'\nTipos de variables de order_items:')
+print(df_order_items_clean_dupl.dtypes)
+print(f'\nTipos de variables de customers:')
+print(df_customers_clean_dupl.dtypes)
+print(f'\nTipos de variables de products:')
+print(df_products_clean_dupl.dtypes)
+print("------------------------------------------")
+
+# Convertir fechas a formato datetime
+
+orders_date_cols = ['order_date']
+customers_date_cols = ['birth_date','registration_date','last_login']
+products_date_cols = ['created_at','updated_at']
+
+df_orders_clean_dupl[orders_date_cols] = df_orders_clean_dupl[orders_date_cols].apply(pd.to_datetime, errors='coerce')
+df_customers_clean_dupl[customers_date_cols] = df_customers_clean_dupl[customers_date_cols].apply(pd.to_datetime, errors='coerce')
+df_products_clean_dupl[products_date_cols] = df_products_clean_dupl[products_date_cols].apply(pd.to_datetime, errors='coerce')
+
+# Asegurar que columnas de valores numéricos sean de tipo numérico y columnas booleanas sean de tipo booleano
+
+order_float_cols = ['total_amount','subtotal','discount_percent','shipping_cost','tax_amount']
+order_int_cols = ['order_id', 'customer_id', 'promotion_id']
+order_items_float_cols = ['unit_price','subtotal','quantity']
+order_items_int_cols = ['order_item_id','order_id','product_id']
+customers_float_cols = ['postal_code']
+customers_int_cols = ['customer_id']
+customers_bool_cols = ['accepts_marketing','is_verified']
+products_float_cols = ['cost','weight_kg','price']
+products_int_cols = ['product_id','category_id','brand_id','supplier_id']
+products_bool_cols = ['is_active']
+
+# Asegurar valores flotantes
+df_orders_clean_dupl[order_float_cols] = df_orders_clean_dupl[order_float_cols].apply(pd.to_numeric, errors='coerce')
+df_order_items_clean_dupl[order_items_float_cols] = df_order_items_clean_dupl[order_items_float_cols].apply(pd.to_numeric, errors='coerce')
+df_customers_clean_dupl[customers_float_cols] = df_customers_clean_dupl[customers_float_cols].apply(pd.to_numeric, errors='coerce')
+df_products_clean_dupl[products_float_cols] = df_products_clean_dupl[products_float_cols].apply(pd.to_numeric, errors='coerce')
+
+#Corroborar si se generaron nulos al convertir flotantes a numéricos
+print("------------------------------------------")
+print(f'\nValores nulos post conversión a numéricos, si se tienen aun nulos se deben eliminar filas con nulos:')
+print(f"\nNulos de Orders:")
+print(df_orders_clean_dupl[order_float_cols].isnull().sum())
+print(f"\nNulos de Order Items:")
+print(df_order_items_clean_dupl[order_items_float_cols].isnull().sum())
+print(f"\nNulos de Customers:")
+print(df_customers_clean_dupl[customers_float_cols].isnull().sum())
+print(f"\nNulos de Products:")
+print(df_products_clean_dupl[products_float_cols].isnull().sum())
+print("------------------------------------------")
+
+# Asegurar valores enteros
+df_orders_clean_dupl[order_int_cols] = df_orders_clean_dupl[order_int_cols].apply(pd.to_numeric, errors='coerce', downcast='integer')
+df_order_items_clean_dupl[order_items_int_cols] = df_order_items_clean_dupl[order_items_int_cols].apply(pd.to_numeric, errors='coerce', downcast='integer')
+df_customers_clean_dupl[customers_int_cols] = df_customers_clean_dupl[customers_int_cols].apply(pd.to_numeric, errors='coerce', downcast='integer')
+df_products_clean_dupl[products_int_cols] = df_products_clean_dupl[products_int_cols].apply(pd.to_numeric, errors='coerce', downcast='integer')
+
+#Corroborar si se generaron nulos al convertir flotantes a enteros
+print("------------------------------------------")
+print(f'\nValores nulos post conversión a enteros, si se tienen aun nulos se deben eliminar filas con nulos:')
+print(f"\nNulos de Orders:")
+print(df_orders_clean_dupl[order_int_cols].isnull().sum())
+print(f"\nNulos de Order Items:")
+print(df_order_items_clean_dupl[order_items_int_cols].isnull().sum())
+print(f"\nNulos de Customers:")
+print(df_customers_clean_dupl[customers_int_cols].isnull().sum())
+print(f"\nNulos de Products:")
+print(df_products_clean_dupl[products_int_cols].isnull().sum())
+print("------------------------------------------")
+
+# Asegurar valores booleanos
+df_customers_clean_dupl[customers_bool_cols] = df_customers_clean_dupl[customers_bool_cols].apply(pd.to_numeric, errors='coerce').astype(bool)
+df_products_clean_dupl[products_bool_cols] = df_products_clean_dupl[products_bool_cols].apply(pd.to_numeric, errors='coerce').astype(bool)
+
+#Corroborar si se generaron nulos al convertir abooleanos
+print("------------------------------------------")
+print(f'\nValores nulos post conversión a booleanos, si se tienen aun nulos se deben eliminar filas con nulos:')
+print(f"\nNulos de Customers:")
+print(df_customers_clean_dupl[customers_bool_cols].isnull().sum())
+print(f"\nNulos de Products:")
+print(df_products_clean_dupl[products_bool_cols].isnull().sum())
+print("------------------------------------------")
+
+# Eliminar valores nulos generados por conversiones de tipo y comparar numero de filas antes y después de eliminación
+df_orders_clean_types = df_orders_clean_dupl.dropna(subset=order_float_cols + order_int_cols)
+df_order_items_clean_types = df_order_items_clean_dupl.dropna(subset=order_items_float_cols + order_items_int_cols)
+df_customers_clean_types = df_customers_clean_dupl.dropna(subset=customers_float_cols + customers_int_cols)
+df_products_clean_types = df_products_clean_dupl.dropna(subset=products_float_cols + products_int_cols)
+
+orders_rows_erased_types = df_orders_clean_dupl.shape[0] - df_orders_clean_types.shape[0]
+order_items_rows_erased_types = df_order_items_clean_dupl.shape[0] - df_order_items_clean_types.shape[0]
+customers_rows_erased_types = df_customers_clean_dupl.shape[0] - df_customers_clean_types.shape[0]  
+products_rows_erased_types = df_products_clean_dupl.shape[0] - df_products_clean_types.shape[0]
+
+print("------------------------------------------")
+print(f"\n  Filas eliminadas por tratamiento de tipos de variables:")
+print(f"Orders: {orders_rows_erased_types} filas")
+print(f"Order Items: {order_items_rows_erased_types} filas")
+print(f"Customers: {customers_rows_erased_types} filas")
+print(f"Products: {products_rows_erased_types} filas")
+print("------------------------------------------")
+
+print("-------------------------------------------")
+print(f'\nTipos de variables post limpieza:')
+print(f'\nTipos de variables de orders:')
+print(df_orders_clean_types.dtypes)
+print(f'\nTipos de variables de order items:')
+print(df_order_items_clean_types.dtypes)
+print(f'\nTipos de variables de customers:')
+print(df_customers_clean_types.dtypes)
+print(f'\nTipos de variables de products:')
+print(df_products_clean_types.dtypes)
+print("-------------------------------------------")
+
 ###########################################
 # Transform: Otros
+###########################################
+
+#Cualquier otra transformación que se considere necesaria añadir posteriormente, por ejemplo:
+# - Crear nuevas columnas a partir de las existentes (por ejemplo, año y mes a partir de order_date)
+# - Eliminar columnas que no se consideren relevantes para el análisis
+
+
+###########################################
+# Transform: Responder a preguntas de negocio
 ###########################################
 
 #################################################################################
@@ -273,6 +399,8 @@ print("------------------------------------------")
 ###########################################
 # Load: Guardar data como CSV
 ###########################################
+
+
 
 ###########################################
 # Load: Guardar data como Parquet
