@@ -122,7 +122,7 @@ print(products_null_stats)
 # Columnas críticas (se eliminará fila): order_id, customer_id, order_date, total_amount
 #
 # Order Items:
-# Columnas no críticas: unit_price, quantity, subtotal (estas columnas se puede calcular con los datos de otras columnas, si no es posible hacer el cálculo se considera como crítico, en esta sección se cambiarán por cero y se revisará en limpieza posterior)
+# Columnas no críticas: unit_price, quantity, subtotal
 # Columnas críticas (se eliminará fila): order_item_id, order_id, product_id,
 #
 # Customers:
@@ -387,21 +387,107 @@ print("-------------------------------------------")
 # - Crear nuevas columnas a partir de las existentes (por ejemplo, año y mes a partir de order_date)
 # - Eliminar columnas que no se consideren relevantes para el análisis
 
+# Si se añade alguna transformación adicional hacer refactoring de esta sección
+df_orders_clean = df_orders_clean_types.copy()
+df_order_items_clean = df_order_items_clean_types.copy()
+df_customers_clean = df_customers_clean_types.copy()
+df_products_clean = df_products_clean_types.copy()
 
 ###########################################
 # Transform: Responder a preguntas de negocio
 ###########################################
 
+# Pregunta 1: ¿Quienes son los 5 clientes que mas gastan?
+
+# Generar 5 mejores cliente con agrupación por cliente agregando el total gastado por cliente y ordenando de mayor a menor
+top_5_customers = df_orders_clean.groupby('customer_id')['total_amount'].sum().sort_values(ascending=False).head(5)
+
+#Añadir nombre y apellido de top 5 clientes
+top_5_customers = top_5_customers.reset_index().merge(df_customers_clean[['customer_id','first_name','last_name','city','email']], on='customer_id', how='left')
+
+print("------------------------------------------")
+print("\n  Top 5 clientes que mas gastan:")
+print(top_5_customers)
+print("------------------------------------------")
+
+
+# Pregunta 2: ¿Cuál es el producto mas vendido? (por cantidad)
+
+top_5_products = df_order_items_clean.groupby('product_id')['quantity'].sum().sort_values(ascending=False).head(5)
+
+
+#Añadir nombre de producto a top 5 productos
+top_5_products = top_5_products.reset_index().merge(df_products_clean[['product_id','product_name','sku']], on='product_id', how='left')
+best_selling_product = top_5_products.head(1)
+
+print("------------------------------------------")
+print("\n  Top 5 productos mas vendidos:")
+print(top_5_products)
+print("\n  Producto mas vendido:")
+print(best_selling_product)
+print("------------------------------------------")
+
+# Pregunta 3: ¿Cómo evolucionaron las ventas mes a mes?
+
+# Crear columna de año-mes a partir de order_date
+df_orders_clean['year_month'] = df_orders_clean['order_date'].dt.to_period('M')
+
+# Agrupar por año-mes y sumar total_amount para obtener ventas totales por mes
+sales_evolution = df_orders_clean.groupby('year_month')['total_amount'].sum().reset_index()
+
+# Asegurar que sales evolution este ordenado de forma cronológica
+sales_evolution = sales_evolution.sort_values('year_month')
+
+print("------------------------------------------")
+print("\n  Evolución de ventas mes a mes:")
+print(sales_evolution)
+print("------------------------------------------")
+
+# Cualquier otra pregunta de negocio que se quiera responder se puede añadir posteriormente, por ejemplo:
+# - ¿Cuál es la categoría de producto más vendida?
+# - ¿Cuál es la ciudad con más clientes?
+# - ¿Cuál es el método de pago más utilizado?
+
 #################################################################################
 #                                       LOAD
 #################################################################################
+
+# Crear carpeta de output si no existe
+os.makedirs('output', exist_ok=True)
 
 ###########################################
 # Load: Guardar data como CSV
 ###########################################
 
+# Crear subcarpeta para data csv si no existe
+os.makedirs('output/csv', exist_ok=True)
+
+# Guardar data limpia como CSV
+df_orders_clean.to_csv('output/csv/orders_clean.csv', index=False)
+df_order_items_clean.to_csv('output/csv/order_items_clean.csv', index=False)
+df_customers_clean.to_csv('output/csv/customers_clean.csv', index=False)
+df_products_clean.to_csv('output/csv/products_clean.csv', index=False)
+
+# Guardar respuestas a preguntas de negocio como CSV
+top_5_customers.to_csv('output/csv/top_5_customers.csv', index=False)
+best_selling_product.to_csv('output/csv/best_selling_product.csv', index=False)
+sales_evolution.to_csv('output/csv/sales_evolution.csv', index=False)
 
 
 ###########################################
 # Load: Guardar data como Parquet
 ###########################################
+
+# Crear subcarpeta para data parquet si no existe
+os.makedirs('output/parquet', exist_ok=True)
+
+# Guardar data limpia como Parquet
+df_orders_clean.to_parquet('output/parquet/orders_clean.parquet', index=False)
+df_order_items_clean.to_parquet('output/parquet/order_items_clean.parquet', index=False)
+df_customers_clean.to_parquet('output/parquet/customers_clean.parquet', index=False)
+df_products_clean.to_parquet('output/parquet/products_clean.parquet', index=False)
+
+# Guardar respuestas a preguntas de negocio como Parquet
+top_5_customers.to_parquet('output/parquet/top_5_customers.parquet', index=False)
+best_selling_product.to_parquet('output/parquet/best_selling_product.parquet', index=False)
+sales_evolution.to_parquet('output/parquet/sales_evolution.parquet', index=False)
